@@ -1,6 +1,24 @@
+===============gulp installs=============
+
+npm install gulp --save-dev
+npm install browserify --save-dev
+npm install vinyl-source-stream --save-dev
+npm install gulp-uglify --save-dev
+npm install gulp-util --save-dev
+npm install del --save-dev
+npm install jshint --save-dev
+npm install gulp-jshint --save-dev
+npm install bower-files --save-dev
+
+===============bower installs============
+
+bower install jquery --save
+bower install bootstrap --save
+bower install moment --save
+
 ==============gulpfiles.js===============
 
-var gulp = require('gulp');  //  npm install gulp --save-dev
+var gulp = require('gulp');  //
 var concat = require('gulp-concat');     // npm install gulp-concat --save-dev
 var browserify = require('browserify');  //  npm install browserify --save-dev
 var source = require('vinyl-source-stream');     // npm install vinyl-source-stream --save-dev
@@ -10,6 +28,21 @@ var del = require('del');    //    npm install del --save-dev
 var jshint = require('gulp-jshint');     // npm install jshint --save-dev && npm install gulp-jshint --save-dev
 
 var buildProduction = utilities.env.production;
+
+gulp.task('bowerCSS', function() {
+    return gulp.src(lib.ext('css').files)
+    .pipe(concat('vendor.css'))
+    .pipe(gulp.dest('./build/css'));
+});
+
+gulp.task('bowerJS', function() {
+    return gulp.src(lib.ext('js').files)
+    .pipe(concat('vendor.min.js'))
+    .pipe(uglify())
+    .pipe(gulp.dest('./build/js'));
+});
+
+gulp.task('bower', ['bowerJS', 'bowerCSS']);
 
 gulp.task('concatInterface', function(){
     return gulp.src(['./js/*-interface.js'])
@@ -40,6 +73,7 @@ gulp.task("build", ['clean'], function(){
     } else {
         gulp.start('jsBrowserify');
     }
+    gulp.start('bower');
 });
 
 gulp.task('jshint', function(){
@@ -53,9 +87,10 @@ gulp.task('jshint', function(){
 <!DOCTYPE html>
 <html>
     <head>
-        <script src="js/jquery-3.2.1.js"></script>
+        <link rel="stylesheet" href="build/css/vendor.css"> //bootsrtap
+        <script src="build/js/vendor.min.js"></script>
         <script type="text/javascript" src="build/js/app.js"></script>
-        <title></title>
+        <title>Ping Pong</title>
     </head>
     <body>
     </body>
@@ -66,16 +101,23 @@ gulp.task('jshint', function(){
 .gitignore
     node_modules/
     .DS_Store
+    bower_components
 gulpfile.js
 index.html
 
 ==============folders===============
-.tmp
-build/js
-    app.js
+
 js
-    jquery-3.2.1.js
-    all js files .js and -interface.js
-node_modules
-tmp
-    allConcat.js
+    all js dev files .js and -interface.js
+
+================run clone===========
+
+$ npm install
+$ bower install
+$ gulp build
+$ gulp serve
+
+============build commands===========
+
+gulp build --production // with minification for users
+gulp build  //  development build
