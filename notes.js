@@ -2,19 +2,27 @@
 
 npm install gulp --save-dev
 npm install browserify --save-dev
+npm install gulp-concat --save-dev
 npm install vinyl-source-stream --save-dev
 npm install gulp-uglify --save-dev
 npm install gulp-util --save-dev
 npm install del --save-dev
 npm install jshint --save-dev
 npm install gulp-jshint --save-dev
-npm install bower-files --save-dev
 
 ===============bower installs============
 
+npm install bower -g //once per pc?
+npm install bower-files --save-dev
 bower install jquery --save
 bower install bootstrap --save
 bower install moment --save
+npm install browser-sync --save-dev
+
+==============initilization=============
+
+npm init
+bower init
 
 ==============gulpfiles.js===============
 
@@ -26,6 +34,18 @@ var uglify = require('gulp-uglify');     // npm install gulp-uglify --save-dev
 var utilities = require('gulp-util');    //    npm install gulp-util --save-dev
 var del = require('del');    //    npm install del --save-dev
 var jshint = require('gulp-jshint');     // npm install jshint --save-dev && npm install gulp-jshint --save-dev
+var browserSync = require('browser-sync').create(); // npm install browser-sync --save-dev
+var lib = require('bower-files')({
+  "overrides":{
+    "bootstrap" : {
+      "main": [
+        "less/bootstrap.less",
+        "dist/css/bootstrap.css",
+        "dist/js/bootstrap.js"
+      ]
+    }
+  }
+});
 
 var buildProduction = utilities.env.production;
 
@@ -43,6 +63,30 @@ gulp.task('bowerJS', function() {
 });
 
 gulp.task('bower', ['bowerJS', 'bowerCSS']);
+
+gulp.task('htmlBuild', function(){
+  browserSync.reload();
+});
+
+gulp.task('bowerBuild', ['bower'], function(){
+  browserSync.reload();
+});
+
+gulp.task('serve', function(){
+    browserSync.init({
+        server: {
+            baseDir: './',
+            index: "index.html"
+        }
+    });
+    gulp.watch(['js/*.js'], ['jsBuild']);
+    gulp.watch(['bower.json'], ['bowerBuild']);
+    gulp.watch(['*.html'], ['htmlBuild']);
+});
+
+gulp.task('jsBuild', ['jsBrowserify', 'jshint'], function(){
+  browserSync.reload();
+});
 
 gulp.task('concatInterface', function(){
     return gulp.src(['./js/*-interface.js'])
@@ -90,7 +134,7 @@ gulp.task('jshint', function(){
         <link rel="stylesheet" href="build/css/vendor.css"> //bootsrtap
         <script src="build/js/vendor.min.js"></script>
         <script type="text/javascript" src="build/js/app.js"></script>
-        <title>Ping Pong</title>
+        <title></title>
     </head>
     <body>
     </body>
@@ -101,7 +145,11 @@ gulp.task('jshint', function(){
 .gitignore
     node_modules/
     .DS_Store
-    bower_components
+    bower_components/
+    build/
+    tmp/
+    .env
+
 gulpfile.js
 index.html
 
